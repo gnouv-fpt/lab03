@@ -1,0 +1,9 @@
+{
+    "dotrush.roslyn.projectOrSolutionFiles": [
+        "e:\\FPTU\\2026SUMMER\\PRN222\\lab03\\ChatClient.sln",
+        "e:\\FPTU\\2026SUMMER\\PRN222\\lab03\\Lab03ChatApp.sln",
+        "e:\\FPTU\\2026SUMMER\\PRN222\\lab03\\ChatClient\\ChatClient.csproj",
+        "e:\\FPTU\\2026SUMMER\\PRN222\\lab03\\ChatServer\\ChatServer.csproj",
+        "e:\\FPTU\\2026SUMMER\\PRN222\\lab03\\ChatShared\\ChatShared.csproj"
+    ]
+}

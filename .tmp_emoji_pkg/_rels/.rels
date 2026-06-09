@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Type="http://schemas.microsoft.com/packaging/2010/07/manifest" Target="/Emoji.Wpf.nuspec" Id="RA48642DF21E67363" />
+  <Relationship Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="/package/services/metadata/core-properties/ccc9b83b24f94a7ab85deeb73a8f49be.psmdcp" Id="R12CB76BD1DE103B1" />
+</Relationships>

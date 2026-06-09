@@ -1,0 +1,9 @@
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+ChatServer/App_Data/
+ChatServer/wwwroot/uploads/
+server-smoke.*.log

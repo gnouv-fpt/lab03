@@ -1,0 +1,407 @@
+<Window x:Class="ChatClient.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:emoji="clr-namespace:Emoji.Wpf;assembly=Emoji.Wpf"
+        xmlns:local="clr-namespace:ChatClient"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        Title="Chat Client"
+        Width="1366"
+        Height="768"
+        MinWidth="1120"
+        MinHeight="660"
+        Background="#E9EDF3"
+        FontFamily="Segoe UI"
+        Closing="Window_Closing"
+        mc:Ignorable="d">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+        <local:OwnMessageAlignmentConverter x:Key="OwnAlignment" />
+        <local:OwnMessageBrushConverter x:Key="OwnBubbleBrush" />
+        <local:OwnMessageForegroundConverter x:Key="OwnForeground" />
+
+        <SolidColorBrush x:Key="ZaloBlue" Color="#0068FF" />
+        <SolidColorBrush x:Key="TextStrong" Color="#10233F" />
+        <SolidColorBrush x:Key="TextMuted" Color="#6B778C" />
+        <SolidColorBrush x:Key="Line" Color="#E3E8EF" />
+
+        <Style x:Key="RailButton" TargetType="Button">
+            <Setter Property="Width" Value="44" />
+            <Setter Property="Height" Value="44" />
+            <Setter Property="Margin" Value="0,6" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+
+        <Style x:Key="IconButton" TargetType="Button">
+            <Setter Property="Width" Value="36" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Margin" Value="2,0" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="#10233F" />
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+
+        <Style x:Key="CircleAction" TargetType="Button">
+            <Setter Property="Width" Value="42" />
+            <Setter Property="Height" Value="42" />
+            <Setter Property="Margin" Value="8,0" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="#EEF2F7" />
+            <Setter Property="Foreground" Value="#10233F" />
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Height" Value="36" />
+            <Setter Property="MinWidth" Value="76" />
+            <Setter Property="Padding" Value="14,0" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="{StaticResource ZaloBlue}" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid x:Name="ImagePreviewOverlay"
+              Grid.RowSpan="2"
+              Panel.ZIndex="999"
+              Background="#CC000000"
+              MouseLeftButtonDown="ImagePreviewOverlay_MouseLeftButtonDown"
+              Visibility="Collapsed">
+            <Image x:Name="PreviewFullImage"
+                   Margin="48"
+                   Stretch="Uniform" />
+            <Button Width="42"
+                    Height="42"
+                    Margin="24"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Background="#22000000"
+                    BorderBrush="#66FFFFFF"
+                    Click="ClosePreviewButton_Click"
+                    Content="x"
+                    FontSize="18"
+                    Foreground="White" />
+        </Grid>
+
+        <Border Grid.Row="0" Visibility="Collapsed" Background="#EAF4FF" BorderBrush="#DDE8F6" BorderThickness="0,0,0,1">
+            <DockPanel Margin="12,0">
+                <Button DockPanel.Dock="Right"
+                        Width="32"
+                        Height="32"
+                        BorderThickness="0"
+                        Background="Transparent"
+                        Content="x"
+                        Foreground="#10233F" />
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal">
+                    <TextBlock Text="&#xE896;" FontFamily="Segoe MDL2 Assets" Margin="0,0,12,0" Foreground="{StaticResource ZaloBlue}" FontSize="17" />
+                    <TextBlock Text="Su dung ban desktop de luu tru va tim kiem lich su tro chuyen day du."
+                               Foreground="#263B59"
+                               FontSize="14" />
+                    <TextBlock Text="  Tai ngay"
+                               Foreground="{StaticResource ZaloBlue}"
+                               FontSize="14"
+                               FontWeight="SemiBold" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="326" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="316" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Background="White" BorderBrush="{StaticResource Line}" BorderThickness="0,0,1,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="70" />
+                        <RowDefinition Height="42" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0" Margin="14,12,12,10">
+                        <Border Height="38" Padding="12,0" Background="#EEF1F5" CornerRadius="6">
+                            <DockPanel VerticalAlignment="Center">
+                                <TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets" Margin="0,0,8,0" Foreground="{StaticResource TextMuted}" />
+                                <TextBox BorderThickness="0" Background="Transparent" Foreground="{StaticResource TextStrong}" Text="Tim kiem" />
+                            </DockPanel>
+                        </Border>
+                    </Grid>
+
+                    <DockPanel Grid.Row="1" Margin="14,0,12,0">
+                        <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center" Foreground="{StaticResource TextStrong}" Text="Loc" />
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Margin="0,0,18,0" Foreground="{StaticResource ZaloBlue}" FontWeight="SemiBold" Text="Tat ca" />
+                            <TextBlock Foreground="{StaticResource TextMuted}" FontWeight="SemiBold" Text="Chua doc" />
+                        </StackPanel>
+                    </DockPanel>
+
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <Border Margin="8,0,8,0" Padding="10" Background="#E7F1FF" CornerRadius="6">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="48" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Width="42" Height="42" Background="White" BorderBrush="#D9DEE8" BorderThickness="1" CornerRadius="21">
+                                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource ZaloBlue}" FontSize="10" FontWeight="Bold" Text="CHAT" />
+                                    </Border>
+                                    <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                        <TextBlock Foreground="{StaticResource TextStrong}" FontSize="15" FontWeight="SemiBold" Text="Phong chat chung" />
+                                        <TextBlock Margin="0,5,0,0" Foreground="{StaticResource TextMuted}" Text="SignalR realtime" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="70" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="126" />
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0" Background="White" BorderBrush="{StaticResource Line}" BorderThickness="0,0,0,1">
+                    <Grid Margin="20,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="52" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Border Width="42" Height="42" VerticalAlignment="Center" Background="White" BorderBrush="#D9DEE8" BorderThickness="1" CornerRadius="21">
+                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource ZaloBlue}" FontSize="10" FontWeight="Bold" Text="CHAT" />
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Foreground="{StaticResource TextStrong}" FontSize="18" FontWeight="SemiBold" Text="Phong chat chung" />
+                            <TextBlock Margin="0,4,0,0" Foreground="{StaticResource TextMuted}" Text="SignalR realtime - file, anh, video, emoji" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Grid Grid.Row="1" Background="#E9EDF3">
+                    <ListBox x:Name="MessagesList"
+                             Padding="48,18,48,18"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             ItemsSource="{Binding Messages}"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Margin" Value="0,4" />
+                                <Setter Property="Background" Value="Transparent" />
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid HorizontalAlignment="{Binding IsOwn, Converter={StaticResource OwnAlignment}}">
+                                    <StackPanel HorizontalAlignment="{Binding IsOwn, Converter={StaticResource OwnAlignment}}">
+                                        <TextBlock Text="{Binding SenderLine}"
+                                                   Foreground="{StaticResource TextMuted}"
+                                                   FontSize="11"
+                                                   FontWeight="SemiBold"
+                                                   Margin="4,2,4,4"
+                                                   HorizontalAlignment="{Binding IsOwn, Converter={StaticResource OwnAlignment}}" />
+                                        <Border MaxWidth="560"
+                                                Padding="12,10"
+                                                Background="{Binding IsOwn, Converter={StaticResource OwnBubbleBrush}}"
+                                                BorderBrush="#D9DEE8"
+                                                BorderThickness="1"
+                                                CornerRadius="6">
+                                            <StackPanel>
+                                                <emoji:TextBlock Margin="0"
+                                                                 FontSize="15"
+                                                                 Foreground="{StaticResource TextStrong}"
+                                                                 Text="{Binding Text}"
+                                                                 TextWrapping="Wrap"
+                                                                 Visibility="{Binding HasText, Converter={StaticResource BoolToVisibility}}" />
+                                            <Image MaxWidth="330"
+                                                   MaxHeight="250"
+                                                   Margin="0,10,0,0"
+                                                   Cursor="Hand"
+                                                   Stretch="Uniform"
+                                                   Source="{Binding PreviewImage}"
+                                                   Tag="{Binding}"
+                                                   MouseLeftButtonUp="PreviewAttachmentImage_Click"
+                                                   Visibility="{Binding IsImageAttachment, Converter={StaticResource BoolToVisibility}}" />
+                                            <StackPanel Margin="0,10,0,0"
+                                                        Orientation="Horizontal"
+                                                        Visibility="{Binding IsImageAttachment, Converter={StaticResource BoolToVisibility}}">
+                                                <Button Padding="12,6" Tag="{Binding}" Click="DownloadAttachment_Click" Content="Tai ve" />
+                                            </StackPanel>
+                                            <Border Margin="0,10,0,0"
+                                                    Padding="12"
+                                                    Background="#F7FAFC"
+                                                    BorderBrush="#DDE8F0"
+                                                    BorderThickness="1"
+                                                    CornerRadius="6"
+                                                    Visibility="{Binding IsVideoAttachment, Converter={StaticResource BoolToVisibility}}">
+                                                <StackPanel>
+                                                    <TextBlock Text="Video" FontWeight="SemiBold" Foreground="{StaticResource TextStrong}" />
+                                                    <TextBlock Margin="0,4,0,10" Foreground="{StaticResource TextMuted}" Text="{Binding AttachmentName}" />
+                                                    <MediaElement Height="220"
+                                                                  LoadedBehavior="Manual"
+                                                                  UnloadedBehavior="Stop"
+                                                                  Stretch="Uniform"
+                                                                  Source="{Binding FullAttachmentUri}"
+                                                                  Loaded="VideoPreview_Loaded"
+                                                                  MediaFailed="VideoPreview_MediaFailed" />
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Button Padding="12,6" Tag="{Binding}" Click="OpenAttachment_Click" Content="Xem" />
+                                                        <Button Margin="8,0,0,0" Padding="12,6" Tag="{Binding}" Click="DownloadAttachment_Click" Content="Tai ve" />
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </Border>
+                                            <Border Margin="0,10,0,0"
+                                                    Padding="12"
+                                                    Background="#F7FAFC"
+                                                    BorderBrush="#DDE8F0"
+                                                    BorderThickness="1"
+                                                    CornerRadius="6"
+                                                    Visibility="{Binding IsFileAttachment, Converter={StaticResource BoolToVisibility}}">
+                                                <DockPanel LastChildFill="True">
+                                                    <TextBlock DockPanel.Dock="Left" Width="34" Text="&#xE723;" FontFamily="Segoe MDL2 Assets" FontSize="22" />
+                                                    <Button DockPanel.Dock="Right" Padding="12,6" Tag="{Binding}" Click="DownloadAttachment_Click" Content="Tai ve" />
+                                                    <StackPanel Margin="8,0,12,0">
+                                                        <TextBlock FontWeight="SemiBold" Foreground="{StaticResource TextStrong}" Text="{Binding AttachmentName}" />
+                                                        <TextBlock Margin="0,3,0,0" Foreground="{StaticResource TextMuted}" Text="{Binding AttachmentSize}" />
+                                                    </StackPanel>
+                                                </DockPanel>
+                                            </Border>
+                                        </StackPanel>
+                                    </Border>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+
+                <Border Grid.Row="2" Background="White" BorderBrush="{StaticResource Line}" BorderThickness="0,1,0,0">
+                    <Grid>
+                        <DockPanel Margin="18,8,18,0" LastChildFill="False" VerticalAlignment="Top">
+                            <emoji:Picker x:Name="EmojiPicker"
+                                          Width="36"
+                                          Height="36"
+                                          Background="Transparent"
+                                          FontSize="20"
+                                          Cursor="Hand"
+                                          Picked="EmojiPicker_Picked"
+                                          ToolTip="Emoji" />
+                            <Button Click="AttachButton_Click"
+                                    Content="&#xE723;"
+                                    Style="{StaticResource IconButton}"
+                                    ToolTip="Gui tep, anh, video" />
+                        </DockPanel>
+
+                        <DockPanel Margin="18,44,18,14" LastChildFill="True">
+                            <Button DockPanel.Dock="Right" Margin="6,0,0,0" Click="SendButton_Click" Content="Gui" Style="{StaticResource PrimaryButton}" />
+                            <emoji:RichTextBox x:Name="MessageInput"
+                                               MinHeight="44"
+                                               Padding="4,12"
+                                               Background="White"
+                                               BorderThickness="0"
+                                               FontSize="16"
+                                               Foreground="{StaticResource TextStrong}"
+                                               KeyDown="MessageInput_KeyDown"
+                                               VerticalScrollBarVisibility="Hidden" />
+                        </DockPanel>
+
+                        <Border Margin="18,0,104,8"
+                                VerticalAlignment="Bottom"
+                                Background="#F5F8FC"
+                                BorderBrush="#DDE8F0"
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Visibility="{Binding ElementName=UploadProgressBar, Path=Visibility}">
+                            <Grid Margin="8,5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="42" />
+                                </Grid.ColumnDefinitions>
+                                <ProgressBar x:Name="UploadProgressBar"
+                                             Height="8"
+                                             Minimum="0"
+                                             Maximum="100"
+                                             Visibility="Collapsed" />
+                                <TextBlock x:Name="UploadProgressText"
+                                           Grid.Column="1"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Center"
+                                           FontSize="11"
+                                           Foreground="{StaticResource TextMuted}"
+                                           Text="0%"
+                                           Visibility="Collapsed" />
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <Border Grid.Column="2" Background="White" BorderBrush="{StaticResource Line}" BorderThickness="1,0,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="54" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontSize="17"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextStrong}"
+                               Text="Thong tin" />
+
+                    <StackPanel Grid.Row="1" Background="White">
+                        <Border Width="64" Height="64" Margin="0,24,0,12" HorizontalAlignment="Center" Background="White" BorderBrush="#D0D4DC" BorderThickness="2" CornerRadius="32">
+                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource ZaloBlue}" FontSize="11" FontWeight="Bold" Text="CHAT" />
+                        </Border>
+                        <TextBlock HorizontalAlignment="Center" Foreground="{StaticResource TextStrong}" FontSize="17" FontWeight="SemiBold" Text="Phong chat chung" />
+
+                    </StackPanel>
+
+
+
+                    <Border Grid.Row="3" Padding="12" Background="White" BorderBrush="{StaticResource Line}" BorderThickness="0,1,0,0">
+                        <StackPanel>
+                            <TextBlock Foreground="{StaticResource TextMuted}" Text="Ten hien thi" />
+                            <DockPanel Margin="0,8,0,0">
+                                <Button x:Name="ConnectButton" DockPanel.Dock="Right" Margin="8,0,0,0" Click="ConnectButton_Click" Content="Ket noi" Style="{StaticResource PrimaryButton}" />
+                                <TextBox x:Name="UserNameBox" Height="36" Padding="10,7" BorderBrush="#CBD3DF" BorderThickness="1" Text="Ban" />
+                            </DockPanel>
+                            <TextBlock x:Name="StatusText" Margin="0,8,0,0" Foreground="{StaticResource TextMuted}" Text="Chua ket noi" />
+                            <TextBlock x:Name="ConnectionStateText" Margin="0,2,0,0" Foreground="{StaticResource TextMuted}" Text="Nhap ten roi bam Ket noi" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>
