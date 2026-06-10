@@ -327,7 +327,7 @@
                                                BorderThickness="0"
                                                FontSize="16"
                                                Foreground="{StaticResource TextStrong}"
-                                               KeyDown="MessageInput_KeyDown"
+                                               PreviewKeyDown="MessageInput_KeyDown"
                                                VerticalScrollBarVisibility="Hidden" />
                         </DockPanel>
 
@@ -391,13 +391,21 @@
 
                     <Border Grid.Row="3" Padding="12" Background="White" BorderBrush="{StaticResource Line}" BorderThickness="0,1,0,0">
                         <StackPanel>
-                            <TextBlock Foreground="{StaticResource TextMuted}" Text="Ten hien thi" />
+                            <TextBlock Foreground="{StaticResource TextMuted}" Text="Dia chi server" />
+                            <TextBox x:Name="ServerUrlBox"
+                                     Margin="0,8,0,0"
+                                     Height="36"
+                                     Padding="10,7"
+                                     BorderBrush="#CBD3DF"
+                                     BorderThickness="1"
+                                     Text="http://localhost:5050" />
+                            <TextBlock Margin="0,12,0,0" Foreground="{StaticResource TextMuted}" Text="Ten hien thi" />
                             <DockPanel Margin="0,8,0,0">
                                 <Button x:Name="ConnectButton" DockPanel.Dock="Right" Margin="8,0,0,0" Click="ConnectButton_Click" Content="Ket noi" Style="{StaticResource PrimaryButton}" />
                                 <TextBox x:Name="UserNameBox" Height="36" Padding="10,7" BorderBrush="#CBD3DF" BorderThickness="1" Text="Ban" />
                             </DockPanel>
                             <TextBlock x:Name="StatusText" Margin="0,8,0,0" Foreground="{StaticResource TextMuted}" Text="Chua ket noi" />
-                            <TextBlock x:Name="ConnectionStateText" Margin="0,2,0,0" Foreground="{StaticResource TextMuted}" Text="Nhap ten roi bam Ket noi" />
+                            <TextBlock x:Name="ConnectionStateText" Margin="0,2,0,0" Foreground="{StaticResource TextMuted}" Text="Nhap dia chi server, ten roi bam Ket noi" />
                         </StackPanel>
                     </Border>
                 </Grid>

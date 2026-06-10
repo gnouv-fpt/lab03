@@ -17,11 +17,12 @@ namespace ChatClient;
 
 public partial class MainWindow : Window
 {
-    private const string ServerBaseUrl = "http://localhost:5050";
+    private const string DefaultServerBaseUrl = "http://localhost:5050";
 
-    private readonly HttpClient _httpClient = new() { BaseAddress = new Uri(ServerBaseUrl) };
+    private readonly HttpClient _httpClient = new();
     private HubConnection? _connection;
     private string _currentUser = "Ban";
+    private string _serverBaseUrl = DefaultServerBaseUrl;
 
     public ObservableCollection<ChatMessageViewModel> Messages { get; } = [];
 
@@ -30,7 +31,8 @@ public partial class MainWindow : Window
         InitializeComponent();
         DataContext = this;
         Messages.CollectionChanged += Messages_CollectionChanged;
-        SetConnectionStatus("Chua ket noi", "Nhap ten roi bam Ket noi");
+        ServerUrlBox.Text = DefaultServerBaseUrl;
+        SetConnectionStatus("Chua ket noi", "Nhap dia chi server, ten roi bam Ket noi");
     }
 
     private async void ConnectButton_Click(object sender, RoutedEventArgs e)
@@ -40,10 +42,22 @@ public partial class MainWindow : Window
 
     private async Task ConnectAsync()
     {
+        var requestedServerBaseUrl = NormalizeServerBaseUrl(ServerUrlBox.Text);
+        if (requestedServerBaseUrl is null)
+        {
+            SetConnectionStatus("Dia chi server khong hop le", "Nhap dang http://ip:port roi bam Ket noi");
+            ServerUrlBox.Focus();
+            ServerUrlBox.SelectAll();
+            return;
+        }
+
         _currentUser = string.IsNullOrWhiteSpace(UserNameBox.Text) ? "Ban" : UserNameBox.Text.Trim();
+        _serverBaseUrl = requestedServerBaseUrl;
+        _httpClient.BaseAddress = new Uri(_serverBaseUrl);
+        ServerUrlBox.IsEnabled = false;
         UserNameBox.IsEnabled = false;
         ConnectButton.IsEnabled = false;
-        SetConnectionStatus("Dang ket noi...", $"Dang vao phong chat voi ten {_currentUser}");
+        SetConnectionStatus("Dang ket noi...", $"Dang vao {_serverBaseUrl} voi ten {_currentUser}");
 
         try
         {
@@ -53,7 +67,7 @@ public partial class MainWindow : Window
             }
 
             _connection = new HubConnectionBuilder()
-                .WithUrl($"{ServerBaseUrl}/chatHub")
+                .WithUrl($"{_serverBaseUrl}/chatHub")
                 .WithAutomaticReconnect()
                 .Build();
 
@@ -64,7 +78,7 @@ public partial class MainWindow : Window
                     Messages.Clear();
                     foreach (var message in history)
                     {
-                        Messages.Add(ChatMessageViewModel.FromDto(message, _currentUser, ServerBaseUrl));
+                        Messages.Add(ChatMessageViewModel.FromDto(message, _currentUser, _serverBaseUrl));
                     }
                 });
             });
@@ -73,7 +87,7 @@ public partial class MainWindow : Window
             {
                 Dispatcher.Invoke(() =>
                 {
-                    Messages.Add(ChatMessageViewModel.FromDto(message, _currentUser, ServerBaseUrl));
+                    Messages.Add(ChatMessageViewModel.FromDto(message, _currentUser, _serverBaseUrl));
                 });
             });
 
@@ -94,6 +108,7 @@ public partial class MainWindow : Window
                 Dispatcher.Invoke(() =>
                 {
                     SetConnectionStatus("Da ngat ket noi", error?.Message ?? "Ban co the doi ten hoac bam Ket noi de vao lai");
+                    ServerUrlBox.IsEnabled = true;
                     UserNameBox.IsEnabled = true;
                     ConnectButton.IsEnabled = true;
                 });
@@ -107,6 +122,7 @@ public partial class MainWindow : Window
         catch (Exception ex)
         {
             SetConnectionStatus("Khong ket noi duoc server", ex.Message);
+            ServerUrlBox.IsEnabled = true;
             UserNameBox.IsEnabled = true;
             ConnectButton.IsEnabled = true;
         }
@@ -119,7 +135,17 @@ public partial class MainWindow : Window
 
     private async void MessageInput_KeyDown(object sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Enter && Keyboard.Modifiers != ModifierKeys.Shift)
+        if (e.Key != Key.Enter)
+        {
+            return;
+        }
+
+        if (Keyboard.Modifiers == ModifierKeys.Shift)
+        {
+            return;
+        }
+
+        if (Keyboard.Modifiers == ModifierKeys.None)
         {
             e.Handled = true;
             await SendTextAsync();
@@ -136,7 +162,7 @@ public partial class MainWindow : Window
 
         if (!IsConnected())
         {
-            SetConnectionStatus("Chua ket noi server", "Nhap ten roi bam Ket noi");
+            SetConnectionStatus("Chua ket noi server", "Nhap dia chi server, ten roi bam Ket noi");
             return;
         }
 
@@ -170,11 +196,11 @@ public partial class MainWindow : Window
     {
         if (!IsConnected())
         {
-            SetConnectionStatus("Chua ket noi server", "Nhap ten roi bam Ket noi");
+            SetConnectionStatus("Chua ket noi server", "Nhap dia chi server, ten roi bam Ket noi");
             return;
         }
 
-        var pending = ChatMessageViewModel.PendingUpload(Path.GetFileName(path), _currentUser, ServerBaseUrl);
+        var pending = ChatMessageViewModel.PendingUpload(Path.GetFileName(path), _currentUser, _serverBaseUrl);
         Messages.Add(pending);
 
         try
@@ -212,7 +238,7 @@ public partial class MainWindow : Window
                     SentAt = DateTimeOffset.Now,
                     Kind = MessageKind.Text,
                     IsOwn = true,
-                    ServerBaseUrl = ServerBaseUrl
+                    ServerBaseUrl = _serverBaseUrl
                 });
             });
         }
@@ -318,6 +344,33 @@ public partial class MainWindow : Window
     private bool IsConnected()
     {
         return _connection?.State == HubConnectionState.Connected;
+    }
+
+    private static string? NormalizeServerBaseUrl(string? value)
+    {
+        var trimmed = value?.Trim();
+        if (string.IsNullOrWhiteSpace(trimmed))
+        {
+            return null;
+        }
+
+        if (!trimmed.Contains("://", StringComparison.Ordinal))
+        {
+            trimmed = $"http://{trimmed}";
+        }
+
+        if (!Uri.TryCreate(trimmed, UriKind.Absolute, out var uri))
+        {
+            return null;
+        }
+
+        if (!string.Equals(uri.Scheme, Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        return uri.GetLeftPart(UriPartial.Authority).TrimEnd('/');
     }
 
     private void SetConnectionStatus(string primary, string? secondary = null)
