@@ -1,0 +1,139 @@
+@model ChatPageViewModel
+@{
+    ViewData["Title"] = "Chat Client";
+}
+
+<div class="app-shell"
+     data-default-server="@Model.DefaultServerUrl"
+     data-default-name="@Model.DefaultDisplayName">
+    <aside class="left-pane">
+        <div class="brand-block">
+            <div class="brand-mark">C</div>
+            <div>
+                <h1>Chat Client</h1>
+                <p>SignalR chat cho cung mang</p>
+            </div>
+        </div>
+
+        <section class="room-card">
+            <div class="room-avatar">PC</div>
+            <div class="room-meta">
+                <strong>Phong chat chung</strong>
+                <span id="roomSubtitle">Realtime text, emoji, file, image, video</span>
+            </div>
+        </section>
+
+        <section class="settings-card">
+            <label class="field-label" for="serverUrl">Dia chi server</label>
+            <input id="serverUrl" class="text-field" value="@Model.DefaultServerUrl" />
+
+            <label class="field-label" for="displayName">Ten hien thi</label>
+            <input id="displayName" class="text-field" value="@Model.DefaultDisplayName" />
+
+            <button id="connectButton" class="primary-button" type="button">Ket noi</button>
+
+            <div class="status-stack">
+                <strong id="statusPrimary">Chua ket noi</strong>
+                <span id="statusSecondary">Nhap IP may host server, ten roi bam Ket noi</span>
+            </div>
+        </section>
+
+        <section class="info-card">
+            <div class="info-row">
+                <span>Tin nhan</span>
+                <strong id="messageCount">0</strong>
+            </div>
+            <div class="info-row">
+                <span>Tep dang gui</span>
+                <strong id="uploadCount">0</strong>
+            </div>
+        </section>
+    </aside>
+
+    <main class="chat-pane">
+        <header class="chat-header">
+            <div>
+                <h2>Phong chat chung</h2>
+                <p id="chatHeaderStatus">San sang ket noi</p>
+            </div>
+            <div class="header-pill">MVC Web</div>
+        </header>
+
+        <section id="messages" class="messages"></section>
+
+        <section id="uploadQueue" class="upload-queue" hidden></section>
+
+        <footer class="composer">
+            <div class="toolbar">
+                <button id="emojiToggle" class="icon-button" type="button" title="Emoji">🙂</button>
+                <label class="icon-button attach-button" title="Gui tep, anh, video">
+                    📎
+                    <input id="fileInput" type="file" multiple hidden />
+                </label>
+            </div>
+
+            <div id="emojiPanel" class="emoji-panel" hidden>
+                <emoji-picker></emoji-picker>
+            </div>
+
+            <textarea id="messageInput"
+                      class="message-input"
+                      rows="3"
+                      placeholder="Nhap tin nhan. Enter de gui, Shift+Enter de xuong dong"></textarea>
+
+            <div class="composer-actions">
+                <span class="hint-text">Enter gui, Shift+Enter xuong dong</span>
+                <button id="sendButton" class="primary-button send-button" type="button">Gui</button>
+            </div>
+        </footer>
+    </main>
+</div>
+
+<dialog id="imageDialog" class="image-dialog">
+    <button id="closeImageDialog" class="dialog-close" type="button">x</button>
+    <img id="dialogImage" alt="Anh xem truoc" />
+</dialog>
+
+<template id="messageTemplate">
+    <article class="message">
+        <div class="message-meta">
+            <span class="sender"></span>
+            <time class="time"></time>
+        </div>
+        <div class="bubble">
+            <p class="text"></p>
+            <div class="attachment attachment-image" hidden>
+                <img class="attachment-image-preview" alt="Anh gui len" />
+                <div class="attachment-actions">
+                    <a class="secondary-link attachment-download" download>Tai ve</a>
+                </div>
+            </div>
+            <div class="attachment attachment-video" hidden>
+                <video class="attachment-video-preview" controls preload="metadata"></video>
+                <div class="attachment-actions">
+                    <a class="secondary-link attachment-open" target="_blank" rel="noreferrer">Xem</a>
+                    <a class="secondary-link attachment-download" download>Tai ve</a>
+                </div>
+            </div>
+            <div class="attachment attachment-file" hidden>
+                <div class="file-card">
+                    <div>
+                        <strong class="attachment-name"></strong>
+                        <span class="attachment-size"></span>
+                    </div>
+                    <a class="secondary-link attachment-download" download>Tai ve</a>
+                </div>
+            </div>
+        </div>
+    </article>
+</template>
+
+<script>
+    window.chatClientConfig = {
+        defaultServerUrl: "@Model.DefaultServerUrl",
+        defaultDisplayName: "@Model.DefaultDisplayName"
+    };
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js"></script>
+<script src="~/js/chat.js" asp-append-version="true"></script>
