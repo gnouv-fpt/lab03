@@ -17,17 +17,20 @@
     box-sizing: border-box;
 }
 
+html,
 body {
+    height: 100%;
     margin: 0;
-    min-height: 100vh;
     background: var(--bg);
     color: var(--text);
+    overflow: hidden;
 }
 
 .app-shell {
     display: grid;
     grid-template-columns: 320px minmax(0, 1fr);
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .left-pane {
@@ -37,6 +40,8 @@ body {
     padding: 24px 18px;
     background: #f7f9fc;
     border-right: 1px solid var(--line);
+    height: 100vh;
+    overflow-y: auto;
 }
 
 .brand-block,
@@ -176,7 +181,9 @@ body {
 .chat-pane {
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto auto;
-    min-height: 100vh;
+    min-height: 0;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .chat-header {
@@ -202,7 +209,9 @@ body {
     flex-direction: column;
     gap: 14px;
     padding: 20px 24px 12px;
+    min-height: 0;
     overflow-y: auto;
+    overscroll-behavior: contain;
 }
 
 .message {

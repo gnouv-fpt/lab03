@@ -113,6 +113,7 @@
                 messagesEl.innerHTML = "";
                 history.forEach(message => appendMessage(message));
                 syncMessageCount();
+                scrollMessagesToBottom();
             });
 
             connection.on("ReceiveMessage", message => {
@@ -274,7 +275,7 @@
         }
 
         messagesEl.appendChild(node);
-        messagesEl.scrollTop = messagesEl.scrollHeight;
+        scrollMessagesToBottom();
     }
 
     function renderImageAttachment(node, url, fileName) {
@@ -366,6 +367,12 @@
 
     function syncUploadCount() {
         uploadCount.textContent = String(Math.max(0, pendingUploads));
+    }
+
+    function scrollMessagesToBottom() {
+        requestAnimationFrame(() => {
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        });
     }
 
     function formatTime(value) {
